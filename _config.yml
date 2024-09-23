@@ -8,8 +8,8 @@ subtitle: 辞去经年
 description: 这里是我对编程、技术和生活见解的分享平台。我的博客涵盖了前端技术、编译原理、计算机网络等多个领域。 如果有什么错误的地方， 欢迎指出。
 keywords: 博客，笔记
 author: gamejoye
-language:  zh-CN
-timezone:  'Asia/Shanghai'
+language: zh-CN
+timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
