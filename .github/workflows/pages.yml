@@ -33,6 +33,8 @@ jobs:
         run: npm run clean
       - name: Build
         run: npm run build
+      - name: ls public
+        run: ls -R ./public
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
