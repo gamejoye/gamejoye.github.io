@@ -86,7 +86,7 @@ export default function cli(cwd) {
 npm i -ws
 ```
 
-## 配置<root>/package.json
+## 配置*root*/package.json
 添加
 ```json
 {
