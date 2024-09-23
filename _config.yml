@@ -102,7 +102,9 @@ theme: shoka
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: ''
+  type: git
+  repo: https://github.com/gamejoye/gamejoye.github.io.git
+  branch: master
 
 # 文档：https://shoka.lostyu.me/computer-science/note/theme-shoka-doc/dependents/#% E9%85%8D% E7% BD% AE
 markdown:
