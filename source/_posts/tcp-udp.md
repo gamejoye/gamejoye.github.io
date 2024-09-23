@@ -2,6 +2,7 @@
 title: tcp-udp
 date: 2024-09-23 01:56:16
 tags: 计算机网络
+cover: cover.jpeg
 ---
 
 ## TCP与UDP的区别

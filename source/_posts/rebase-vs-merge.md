@@ -2,6 +2,7 @@
 title: rebase-vs-merge
 date: 2024-09-22 15:27:38
 tags: git
+cover: cover.png
 ---
 
 ## 如何使用

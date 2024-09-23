@@ -4,6 +4,7 @@ date: 2024-09-22 15:37:11
 tags: 
   - react
   - 前端
+cover: cover.jpeg
 ---
 
 在 **React** 的 **useState** hook中我们可以传递函数或者其state对应的类型。 以下是他们的区别：
