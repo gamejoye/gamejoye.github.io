@@ -5,6 +5,74 @@ tags: 前端
 cover: cover.jpeg
 ---
 # 作用域与闭包
+## 作用域是什么
+作用域是根据名称查找变量的一套规则
+### LHS和RHS
+当变量出现在赋值操作的左侧时进行 LHS 查询，出现在右侧时进行 RHS 查询。
+
+RHS 查询与简单地查找某个变量的值别无二致，而 LHS 查询则是试图找到变量的容器本身，从而可以对其赋值。
+
+Q：为什么会有LHS和RHS？
+
+A：LHS和RHS找不到变量的处理是不一样的，LHS找不到会创建一个变量， RHS则会抛出错误（Unknow Variable）。 区分LHS和RHS可以让我们在查找变量方式上有其各自对应的处理方法
+
+## 词法作用域
+![词法作用域](lex-scope.png)
+1. 包含着整个全局作用域，其中只有一个标识符：foo。
+2. 包含着 foo 所创建的作用域，其中有三个标识符：a、bar和 b。
+3. 包含着 bar 所创建的作用域，其中只有一个标识符：c。
+
+词法作用域意味着作用域是由书写代码时函数声明的位置来决定的。编译的词法分析阶段基本能够知道全部标识符在哪里以及是如何声明的，从而能够预测在执行过程中如何对它们进行查找。
+
+## 块作用域
+```
+for (let i = 0; i < 5; i++) {
+  console.log(i)
+}
+```
+上面的代码声明了一个块作用域的变量i
+变量i会在每次循环运行函数体的时候重新声明然后赋值。相当于：
+```
+let j;
+for (j=0; j<10; j++) {
+  let i = j; // 每个迭代重新绑定！
+  console.log( i );
+}
+```
+在没有let和const的语法下。 声明块作用域可以通过在try 中抛出错误， 然后catch里面捕获这个错误来实现
+```
+try {
+  throw 2
+} catch(a) {
+  console.log('a', a)
+}
+```
+
+## 提升
+下面的语句分为两步
+
+1. 先**提升**声明变量a
+2. 将2赋值为变量a
+```
+var a = 2
+```
+函数优先
+```
+foo() // 1
+
+var foo = function() {
+  console.log(2)
+}
+
+function foo() {
+  console.log(1)
+}
+
+foo() // 2
+```
+
+## 闭包
+**当函数可以记住并访问所在的词法作用域，即使函数是在当前词法作用域之外执行，这时就产生了闭包。**
 
 
 # this和对象原型
@@ -148,3 +216,222 @@ ES6 中的箭头函数并不会使用四条标准的绑定规则，而是根据�
 
 
 ## 对象
+
+### 内容
+
+#### 属性描述符
+
+从 ES5 开始，所有的属性都具备了属性描述符。
+```
+var myObject = {
+  a:2
+};
+Object.getOwnPropertyDescriptor( myObject, "a" );
+// {
+//  value: 2,
+//  writable: true,
+//  enumerable: true,
+//  configurable: true
+// }
+```
+使用 Object.defineProperty(..)来添加一个新属性或者修改一个已有属性（如果它是 configurable）并对特性进行设置
+```
+var myObject = {};
+Object.defineProperty( myObject, "a", {
+  value: 2,
+  writable: true,
+  configurable: true,
+  enumerable: true
+});
+myObject.a; // 2
+```
+1. writable 决定是否可以修改属性的值。
+2. configurable 只要属性是可配置的，就可以使用 defineProperty(..) 方法来修改属性描述符。把 configurable 修改成false 是单向操作，无法撤销！除了无法修改，configurable:false 还会禁止删除这个属性
+    - tips：即便属性是 configurable:false，我们还是可以把 writable 的状态由 true 改为 false，但是无法由 false 改为 true。
+3. 这个描述符控制的是属性是否会出现在对象的属性枚举中（比如 for...in 循环）
+
+#### 不变性
+以下的方法创建的都是浅不变形，它们只会影响目标对象和它的直接属性。如果目标对象引用了其他对象（数组、对象、函数，等），其他对象的内容不受影响，仍然是可变的
+```
+myImmutableObject.foo; // [1,2,3]
+myImmutableObject.foo.push( 4 );
+myImmutableObject.foo; // [1,2,3,4]
+```
+
+##### 对象常量
+结合 writable:false 和 configurable:false 就可以创建一个真正的**常量属性**（不可修改、重定义或者删除）
+```
+var myObject = {};
+Object.defineProperty( myObject, "FAVORITE_NUMBER", {
+  value: 42,
+  writable: false,
+  configurable: false
+} );
+```
+##### 禁止扩展
+Object.preventExtensions() 静态方法可以防止新属性被添加到对象中（即防止该对象被扩展）。它还可以防止对象的原型被重新指定。
+```
+var myObject = {
+  a:2
+};
+Object.preventExtensions( myObject );
+myObject.b = 3;
+myObject.b; // undefined
+```
+
+##### 密封
+Object.seal(..) 会创建一个“密封”的对象，这个方法实际上会在一个现有对象上调用Object.preventExtensions(..) 并把所有现有属性标记为 configurable:false。所以，密封之后不仅不能添加新属性，也不能重新配置或者删除任何现有属性（虽然可以修改属性的值）。
+
+##### 冻结
+Object.freeze(..) 会创建一个冻结对象，这个方法实际上会在一个现有对象上调用Object.seal(..) 并把所有“数据访问”属性标记为 writable:false，这样就无法修改它们的值。
+
+#### Getter Setter
+> 如果配置的描述符里面有getter则会忽略value， 如果有setter则会忽略writeable
+
+在 ES5 中可以使用 getter 和 setter 部分改写默认操作
+```
+var myObject = {
+  // 给 a 定义一个 getter
+  get a() {
+    return 2;
+  }
+};
+
+Object.defineProperty(
+  myObject, // 目标对象
+  "b", // 属性名
+  { // 描述符
+    // 给 b 设置一个 getter
+    get: function(){ return this.a * 2 },
+    // 确保 b 会出现在对象的属性列表中
+    enumerable: true
+  }
+);
+
+myObject.a; // 2
+myObject.b; // 4
+```
+如果没有定义setter的话，会忽略赋值操作（不会报错）
+
+#### 存在性
+```
+var myObject = {
+  a:2
+};
+("a" in myObject); // true
+("b" in myObject); // false
+myObject.hasOwnProperty( "a" ); // true
+myObject.hasOwnProperty( "b" ); // false
+```
+in 还会检查原型链是否有属性， hasOwnProperty只会检查当前对象是否有属性
+
+1. 可枚举性
+“可枚举”就相当于“可以出现在对象属性的遍历中”
+Object.keys(..) 会返回一个数组，包含所有可枚举属性，Object.getOwnPropertyNames(..)会返回一个数组，包含所有属性，无论它们是否可枚举。
+in 和 hasOwnProperty(..) 的区别在于是否查找原型链，然而，Object.keys(..)和 Object.getOwnPropertyNames(..) 都只会查找对象直接包含的属性。
+
+### 遍历
+for..in 会遍历所有可枚举的属性（包括原型链上的）
+
+for..of 循环首先会向被访问对象请求一个迭代器对象，然后通过调用迭代器对象的
+next() 方法来遍历所有返回值。
+数组有内置的 @@iterator，因此 for..of 可以直接应用在数组上。我们使用内置的 @@
+iterator 来手动遍历数组，看看它是怎么工作的：
+```
+var myArray = [ 1, 2, 3 ];
+var it = myArray[Symbol.iterator]();
+it.next(); // { value:1, done:false }
+it.next(); // { value:2, done:false }
+it.next(); // { value:3, done:false }
+it.next(); // { done:true }
+```
+
+## 原型
+### [[Prototype]]
+解析整个过程
+```
+myObject.foo = "bar";
+```
+1. 如果 myObject 对象中包含名为 foo 的普通数据访问属性，这条赋值语句只会修改已有的属性值。
+2. 若果 myObject 对象没有 foo 而是存在myObject的 [[Prototype]]上的话，会有如下几种情况
+    1. 如果在 [[Prototype]] 链上层存在名为 foo 的普通数据访问属性（参见第 3 章）并且没有被标记为只读（writable:false），那就会直接在 myObject 中添加一个名为 foo 的新属性，它是屏蔽属性。
+    2. 如果在 [[Prototype]] 链上层存在 foo，但是它被标记为只读（writable:false），那么无法修改已有属性或者在 myObject 上创建屏蔽属性。如果运行在严格模式下，代码会抛出一个错误。否则，这条赋值语句会被忽略。总之，不会发生屏蔽。
+    3. 如果在 [[Prototype]] 链上层存在 foo 并且它是一个 setter，那就一定会调用这个 setter。foo 不会被添加到（或者说屏蔽于）myObject，也不会重新定义 foo 这个 setter。
+  
+对于 二、三情况下，如果需要在 myOjbect 上设置 foo 属性可以使用Object.defineProperty(...)
+
+### 总结
+1. JS里面的继承不像其他一些OO语言的继承，JS的继承更像是 **委托**
+2. 如果要访问对象中并不存在的一个属性，[[Get]] 操作就会查找对象内部[[Prototype]] 关联的对象
+3. 关联两个对象最常用的方法是使用 new 关键词进行函数调用，在调用中会创建一个关联其他对象的新对象。
+
+## 行为委托
+
+### 思维模型比较
+1. 面向对象风格
+```
+function Foo(who) {
+  this.me = who;
+}
+Foo.prototype.identify = function() {
+  return "I am " + this.me;
+};
+function Bar(who) {
+  Foo.call( this, who );
+}
+Bar.prototype = Object.create( Foo.prototype );
+Bar.prototype.speak = function() {
+  alert( "Hello, " + this.identify() + "." );
+};
+var b1 = new Bar( "b1" );
+var b2 = new Bar( "b2" );
+b1.speak();
+b2.speak();
+```
+2. 对象委托风格
+```
+Foo = {
+  init: function(who) {
+    this.me = who;
+  },
+  identify: function() {
+    return "I am " + this.me;
+  }
+};
+Bar = Object.create( Foo );
+Bar.speak = function() {
+  alert( "Hello, " + this.identify() + "." );
+};
+var b1 = Object.create( Bar );
+b1.init( "b1" );
+var b2 = Object.create( Bar );
+b2.init( "b2" );
+b1.speak();
+b2.speak();
+```
+- 面向对象风格的原型链
+![面向对象风格的原型链](oo-proto-chain.png)
+
+- 面向对象委托风格的原型链
+![对象委托风格的原型链](od-proto-chain.png)
+
+
+# 其他一些内容
+1. instanceOf 检查左侧的对象的原型链是否跟右侧的函数的prototype是否引用一致
+2. 鸭子类型（典型的就是Promise ）： 如果看起来像鸭子，叫起来像鸭子，那它就是鸭子。 验证是否是Promise的方式就是看该对象是否有then函数， 如果有就当成Promise
+3. 行为委托对比类继承是一种更少见但是更强大的设计模式，倡导直接创建对象和关联对象，而不是抽象成为类。行为委托认为对象之间是兄弟关系，互相委托，而不是父类和子类的关系。使用对象关联时，所有的对象都是通过 [[Prototype]] 委托互相关联，下面是内省的方法
+    - 自省:
+    ```
+    var Foo = { /* .. */ };
+    var Bar = Object.create( Foo );
+    var b1 = Object.create( Bar );
+    //-----------------------------
+    Foo.isPrototypeOf( Bar ); // true
+    Object.getPrototypeOf( Bar ) === Foo; // true
+    //-----------------------------
+    // 让 b1 关联到 Foo 和 Bar
+    Foo.isPrototypeOf( b1 ); // true
+    Bar.isPrototypeOf( b1 ); // true
+    Object.getPrototypeOf( b1 ) === Bar; // true
+    ```
+    - 优点：语法更简洁，代码结构更加清晰
