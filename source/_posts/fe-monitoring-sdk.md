@@ -103,6 +103,19 @@ replacer(originalXHR);
 ```
 
 ### 跨域脚本执行异常
-
+对于跨域的脚本 如果没有添加 `crossorigin="anonymous"` 则三方脚本的错误只显示 `"Script error."`
+添加了`crossorigin="anonymous"`的脚本，对于response需要正确设置`Access-Control-Allow-Origin`允许当前网页进行跨域获取脚本
+1. `anonymous`表示：
+  - 不发送用户凭证（如 cookies）到其他域
+  - 可以捕获脚本的详细错误信息
+2. 不使用`anonymous`：
+  - 跨域脚本错误只显示 "Script error."
+  - 无法获取详细错误信息
+3. `crossorigin="use-credentials"`
+  - 会发送用户凭证到其他域
+  - 需要服务器返回 `Access-Control-Allow-Credentials: true`
+```
+<script src="http://www.example.com/app.js" crossorigin="anonymous"></script>
+```
 
 ## 前端如何做全自动化的异常监控呢
