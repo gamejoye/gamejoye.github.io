@@ -133,17 +133,18 @@ Promise.resolve(p)
 ```
 `Promise.resolve(p)` 如果p是一个Promise的话，直接就返回该Promise，否则会对p进行规范化，保证符合Promise的规范
 
-
-## 可迭代协议
+## 生成器
+### 生成器产生值
+#### 可迭代协议
 可迭代协议允许JavaScript对象定义或定制它们的迭代行为，例如，在一个`for..of`结构中，哪些值可以被遍历到。一些内置类型同时是内置的可迭代对象，并且有默认的迭代行为，比如 Array 或者 Map，而其他内置类型则不是（比如 Object）
 
 要成为可迭代对象，该对象必须实现`[Symbol.iterator]()`方法
 
-### [Symbol.iterator]
+##### [Symbol.iterator]
 > 一个无参数的函数，其返回值为一个符合**迭代器协议**的对象
 
-## 迭代器协议
-### next(value?)
+#### 迭代器协议
+##### next(value?)
 返回一个 `IteratorResult` 接口类型的对象
 
 ```
@@ -155,14 +156,14 @@ Promise.resolve(p)
 ```
 `next`函数传递的value参数是可选的，传递给生成器 `next` 方法的值将成为相应 `yield` 表达式的值
 
-### return(value?)
+##### return(value?)
 无参数或者接受一个参数的函数，并返回符合 `IteratorResult` 接口的对象，其 value 通常等价于传递的 value，并且 done 等于 true。调用这个方法表明迭代器的调用者不打算调用更多的 next()，并且可以进行清理工作。
 
-### throw(exception?)
+##### throw(exception?)
 无参数或者接受一个参数的函数，并返回符合 `IteratorResult` 接口的对象，通常 done 等于 true。调用这个方法表明迭代器的调用者监测到错误的状况
 
 
-## 迭代器实现
+#### 迭代器实现
 ```
 var something = (function () {
   var nextVal;
@@ -194,8 +195,8 @@ for (var v of something) {
 `for..of` 循环在每次迭代中自动调用 next()，它不会向 next() 传入任何值，并且会在接收
 到 done:true 之后自动停止
 
-## 生成器迭代器
-### 示例
+#### 生成器迭代器
+##### 示例
 ```
 function* myGenerator() {
   try {
@@ -213,8 +214,31 @@ console.log(gen.next());    // { value: 1, done: false }
 console.log(gen.throw('Something went wrong')); // Error caught: Something went wrong
 // { value: 3, done: false }
 console.log(gen.next());    // { value: undefined, done: true }
-
 ```
+`something`是**生成器** 并不是一个**可迭代对象**
+`something()`会产生一个**可迭代对象**
+```
+function *something() {
+  var nextVal;
+  while (true) {
+    if (nextVal === undefined) {
+      nextVal = 1;
+    }
+    else {
+      nextVal = (3 * nextVal) + 6;
+    }
+    yield nextVal;
+  }
+}
+for (var v of something()) {
+  console.log( v );
+  if (v > 500) {
+    break;
+  }
+}
+```
+
+### 异步迭代生成器
 
 
 # 其他一些要点
