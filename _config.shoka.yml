@@ -184,19 +184,19 @@ creative_commons:
 # Valine
 # For more information: https://github.com/amehime/MiniValine
 valine:
-  appId: #Your_appId
-  appKey: #Your_appkey
-  placeholder: ヽ(○´∀`)ﾉ♪ # Comment box placeholder
+  appId: ydTGIxI9Sua6XF9FVgptLFvh-gzGzoHsz
+  appKey: k54flCq8EjyrvE1hJf5Nr4fE
+  placeholder: 友好交流 # Comment box placeholder
   avatar: mp # Gravatar style : mp, identicon, monsterid, wavatar, robohash, retro
   pageSize: 10 # Pagination size
-  lang: en
+  lang: zh-CN
   visitor: true # Article reading statistic
   NoRecordIP: false # Whether to record the commenter IP
   serverURLs: # When the custom domain name is enabled, fill it in here (it will be detected automatically by default, no need to fill in)
   powerMode: true
   tagMeta:
     visitor: 新朋友
-    master: 主人
+    master: 博主
     friend: 小伙伴
     investor: 金主粑粑
   tagColor:
@@ -205,8 +205,7 @@ valine:
     investor: "var(--color-pink)"
   tagMember:
     master:
-      # - hash of master@email.com
-      # - hash of master2@email.com
+      - 09bd2a548ec0232fdadeda91f3f22376
     friend:
       # - hash of friend@email.com
       # - hash of friend2@email.com
